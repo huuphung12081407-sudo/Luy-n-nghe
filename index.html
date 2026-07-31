@@ -10,9 +10,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
+    <!-- Nhúng Font Google: Noto Serif SC + ZCOOL XiaoWei + Ma Shan Zheng (Font Khải Thư chuẩn cho di động) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -22,7 +23,8 @@
             --error-color: #c62828;
             --text-main: #333;
             --bg-main: #f8f9fa;
-            --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+            /* Cập nhật thứ tự ưu tiên font KaiTi hỗ trợ tốt di động */
+            --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -382,7 +384,7 @@
             margin-top: 6px;
         }
 
-        /* 🖥 DESKTOP DISPLAY: Giữ nguyên chuẩn giao diện gốc không thay đổi */
+        /* 🖥 DESKTOP DISPLAY */
         @media (min-width: 769px) {
             body { padding: 40px 20px; }
             .container { max-width: 800px; padding: 32px; }
@@ -396,7 +398,7 @@
             .header-status { font-size: 15px; }
         }
 
-        /* 📱 MOBILE RESPONSIVE TỰ ĐỘNG: Co giãn hoàn hảo theo kích thước từng dòng điện thoại */
+        /* 📱 MOBILE RESPONSIVE TỰ ĐỘNG */
         @media (max-width: 768px) {
             body { 
                 padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 8px); 
@@ -520,7 +522,6 @@
 </div>
 
 <script>
-    // ĐĂNG KÝ SERVICE WORKER ĐỂ CHẠY OFFLINE
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -549,6 +550,7 @@
     let currentIndex = config.currentIndex < vocabulary.length ? config.currentIndex : 0;
     let isChecked = false;
     let availableVoices = [];
+    let audioUnlocked = false;
 
     const meaningDisplay = document.getElementById('meaning-display');
     const audioCenterBox = document.getElementById('audio-center-box');
@@ -596,11 +598,18 @@
         "chiếc", "những", "các", "một", "này", "khi", "đó", "mấy", "sự", "việc"
     ]);
 
-    /* CƠ CHẾ MỞ KHÓA ÂM THANH TRÊN ĐIỆN THOẠI TOÀN CỤC */
+    /* CƠ CHẾ MỞ KHÓA ÂM THANH TRÊN ĐIỆN THOẠI (iOS / ANDROID) */
     function unlockAudioContext() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.resume();
-            if (availableVoices.length === 0) loadVoices();
+            if (!audioUnlocked) {
+                // Tạo âm thanh rỗng kích hoạt AudioContext của trình duyệt
+                const silentUtterance = new SpeechSynthesisUtterance('');
+                silentUtterance.volume = 0;
+                window.speechSynthesis.speak(silentUtterance);
+                audioUnlocked = true;
+            }
+            loadVoices();
         }
     }
     
@@ -675,7 +684,7 @@
         }
     }
 
-    /* XỬ LÝ CHUYỂN TAB CỰC NHẠY TRÊN DI ĐỘNG */
+    /* CHUYỂN TAB TRÊN DI ĐỘNG */
     function switchMode(mode, e) {
         if (e) {
             if (e.cancelable) e.preventDefault();
@@ -711,7 +720,6 @@
     tabStandard.addEventListener('click', (e) => switchMode('standard', e));
     tabListening.addEventListener('click', (e) => switchMode('listening', e));
 
-    /* THUẬT TOÁN XÁO TRỘN NGUYÊN TẮC FISHER-YATES */
     function shuffleQuestions(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -730,6 +738,7 @@
         
         loadVoices();
         setTimeout(loadVoices, 500);
+        setTimeout(loadVoices, 1500);
 
         if (!localStorage.getItem('standalone_dict_vocab_cache')) {
             shuffleQuestions(vocabulary);
@@ -757,7 +766,9 @@
         if (currentMode === 'standard') {
             meaningDisplay.textContent = currentData.meaning;
         } else {
-            setTimeout(() => { playAudio(currentData.hanzi); }, 300);
+            if (audioUnlocked) {
+                setTimeout(() => { playAudio(currentData.hanzi); }, 300);
+            }
         }
 
         userInput.value = "";
@@ -918,7 +929,7 @@
     btnPlayAudio.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
     btnPlayAudioLarge.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
 
-    /* TẢI VÀ TỰ ĐỘNG XÁO TRỘN DỮ LIỆU TỪ GOOGLE SHEET */
+    /* TẢI DỮ LIỆU TỪ GOOGLE SHEET */
     function fetchGoogleSheetData() {
         if (!navigator.onLine) {
             alert("Bạn đang ở chế độ Ngoại tuyến (Offline). Vui lòng kết nối Internet để đồng bộ dữ liệu mới.");
