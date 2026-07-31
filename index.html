@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dictation App - Luyện Nghe Chép Chính Tả</title>
+    
+    <!-- PWA Web App Meta Tags -->
+    <meta name="theme-color" content="#1d70f4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1d70f4;
+            --primary-hover: #155bc5;
+            --success-color: #2e7d32;
+            --error-color: #c62828;
+            --text-main: #333;
+            --bg-main: #f8f9fa;
+            --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            position: relative;
+            transition: max-width 0.3s ease;
+        }
+
+        details.settings-details {
+            background: #f0f4f9;
+            border: 2px solid #c3d3e5;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        summary.settings-summary {
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        summary.settings-summary::-webkit-details-marker { display: none; }
+        summary.settings-summary::after {
+            content: "▼";
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary.settings-summary::after { transform: rotate(180deg); }
+
+        .tools-panel-content {
+            padding: 12px 14px 16px 14px;
+            border-top: 1px solid #d0d7de;
+            background-color: #ffffff;
+        }
+
+        /* Navigation Tabs Tối ưu cảm ứng di động */
+        .tab-nav {
+            display: flex;
+            background-color: #eef2f7;
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 6px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            line-height: 1.2;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--primary-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .header-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .badge-level {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 12px;
+        }
+
+        .stats span { margin-left: 6px; }
+        .text-blue { color: var(--primary-color); }
+        .text-green { color: var(--success-color); }
+
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #2ec4b6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .meaning-title {
+            color: var(--primary-color);
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 36px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .audio-center-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f0f6ff;
+            border-radius: 12px;
+            border: 1px dashed #b3d1ff;
+        }
+
+        .btn-audio-large {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(29, 112, 244, 0.3);
+            touch-action: manipulation;
+        }
+
+        .btn-audio-large:active { transform: scale(0.95); }
+        .btn-audio-large svg { fill: #ffffff; width: 30px; height: 30px; }
+
+        .audio-hint {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .result-box {
+            display: none;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .result-status { font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+        .result-details {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            flex-wrap: wrap;
+        }
+
+        .detail-tag { padding: 4px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.8); }
+
+        .chinese-text-display {
+            font-family: var(--font-kaiti);
+            font-size: 32px;
+            color: #1a1a1a;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .input-container-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .input-group { display: flex; gap: 8px; }
+
+        .dictation-input {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 24px;
+            font-family: var(--font-kaiti);
+            font-weight: 500;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            width: 100%;
+            line-height: 1.4;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            font-synthesis: none;
+        }
+
+        .dictation-input::placeholder {
+            font-family: var(--font-sans) !important;
+            font-size: 16px !important;
+            font-weight: normal !important;
+            letter-spacing: normal !important;
+            color: #888888;
+            opacity: 1;
+        }
+
+        .dictation-input:focus { border-color: var(--primary-color); }
+
+        .btn-audio {
+            background: #ffffff;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            width: 52px;
+            height: 52px;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .btn-audio svg { fill: var(--primary-color); width: 24px; height: 24px; }
+
+        .action-group { display: flex; gap: 10px; }
+
+        .btn-submit {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn-retry {
+            display: none;
+            background-color: #ff9800;
+            color: #ffffff;
+            border: none;
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .btn-toggle-answer {
+            background: #ffffff;
+            border: 1px solid #bbb;
+            color: #444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .answer-content { display: none; margin-top: 10px; }
+
+        .config-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+            display: block;
+            color: #444;
+        }
+
+        .config-input, .config-select {
+            width: 100%;
+            padding: 10px;
+            margin: 4px 0 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            -webkit-appearance: none;
+        }
+
+        .speed-control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0 10px 0;
+        }
+
+        .speed-slider { flex: 1; height: 32px; }
+
+        .btn-sync {
+            background-color: var(--success-color);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* 🖥 DESKTOP DISPLAY: Giữ nguyên chuẩn giao diện gốc không thay đổi */
+        @media (min-width: 769px) {
+            body { padding: 40px 20px; }
+            .container { max-width: 800px; padding: 32px; }
+            .meaning-title { font-size: 26px; }
+            .chinese-text-display { font-size: 38px; }
+            .dictation-input { font-size: 28px; padding: 14px; }
+            .dictation-input::placeholder { font-size: 18px !important; }
+            .tab-btn { font-size: 16px; padding: 14px 10px; }
+            .btn-submit, .btn-retry { font-size: 18px; padding: 16px; }
+            .badge-level { font-size: 14px; }
+            .header-status { font-size: 15px; }
+        }
+
+        /* 📱 MOBILE RESPONSIVE TỰ ĐỘNG: Co giãn hoàn hảo theo kích thước từng dòng điện thoại */
+        @media (max-width: 768px) {
+            body { 
+                padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 8px); 
+            }
+            .container { 
+                padding: clamp(12px, 4vw, 20px); 
+                border-radius: 14px;
+            }
+            .meaning-title { 
+                font-size: clamp(17px, 5vw, 22px); 
+                margin-bottom: 16px; 
+            }
+            .chinese-text-display { 
+                font-size: clamp(24px, 7vw, 32px); 
+            }
+            .dictation-input { 
+                font-size: clamp(18px, 5.5vw, 24px); 
+                padding: clamp(8px, 2.5vw, 12px); 
+            }
+            .dictation-input::placeholder { 
+                font-size: clamp(13px, 3.8vw, 16px) !important; 
+            }
+            .btn-audio { 
+                width: clamp(44px, 12vw, 52px); 
+                height: clamp(44px, 12vw, 52px); 
+            }
+            .btn-submit, .btn-retry { 
+                font-size: clamp(14px, 4vw, 16px); 
+                padding: clamp(10px, 3vw, 14px); 
+            }
+            .badge-level { 
+                max-width: 45vw; 
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <details class="settings-details" id="settings-details">
+        <summary class="settings-summary">⚙ Tùy chỉnh & Đồng bộ Google Sheet</summary>
+        <div class="tools-panel-content">
+            <label class="config-label">🔊 Giọng đọc Tiếng Trung:</label>
+            <select id="voice-select" class="config-select">
+                <option value="DEFAULT_SYSTEM">🔊 Giọng mặc định hệ thống (iOS/Android)</option>
+            </select>
+
+            <label class="config-label">⚡ Tốc độ đọc: <span id="speech-rate-val">0.85x</span></label>
+            <div class="speed-control-group">
+                <input type="range" id="speech-rate-slider" class="speed-slider" min="0.5" max="1.5" step="0.05" value="0.85">
+            </div>
+
+            <label class="config-label">Google Sheet ID:</label>
+            <input type="text" id="sheet-id-input" class="config-input" placeholder="Nhập ID trang tính...">
+            
+            <label class="config-label">Tên Sheet (Tab Name):</label>
+            <input type="text" id="sheet-name-input" class="config-input" placeholder="Ví dụ: Sheet1">
+            
+            <button type="button" class="btn-sync" id="btn-sync-data">Đồng bộ dữ liệu</button>
+        </div>
+    </details>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button type="button" class="tab-btn active" id="tab-mode-standard">📝 Chép chính tả</button>
+        <button type="button" class="tab-btn" id="tab-mode-listening">🎧 Nghe thuần túy</button>
+    </div>
+
+    <div class="header-status">
+        <div class="badge-level" id="current-sheet-name">Ngoại tuyến</div>
+        <div class="stats">
+            Còn lại: <span class="text-blue" id="count-remaining">0</span>
+            EXP: <span class="text-green" id="exp-points">0</span>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="meaning-title" id="meaning-display">Đang tải dữ liệu...</div>
+
+    <div class="audio-center-box" id="audio-center-box" style="display: none;">
+        <button type="button" class="btn-audio-large" id="btn-play-audio-large" title="Phát âm thanh">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+        <div class="audio-hint">Nhấn nút để nghe lại âm thanh</div>
+    </div>
+
+    <div class="result-box" id="result-box">
+        <div class="result-status" id="result-status">Chính xác! ✓</div>
+        <div class="result-details" id="result-details" style="display: none;">
+            <div class="detail-tag" id="detail-hanzi">Chữ Hán: </div>
+            <div class="detail-tag" id="detail-meaning">Ý nghĩa: </div>
+        </div>
+        <button type="button" class="btn-toggle-answer" id="btn-toggle-answer">👁 Xem đáp án</button>
+        <div class="answer-content" id="answer-content">
+            <div class="chinese-text-display" id="correct-answer-display"></div>
+            <div id="correct-meaning-display" style="margin-top: 8px; font-size: 15px; color: #444; font-weight: 600;"></div>
+        </div>
+    </div>
+
+    <div class="input-container-group">
+        <div class="input-group">
+            <input type="text" class="dictation-input" id="user-input" placeholder="Nghe và gõ lại chữ Hán" autocomplete="off">
+            <button type="button" class="btn-audio" id="btn-play-audio" title="Nghe lại câu hỏi">
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
+        </div>
+
+        <div class="input-group" id="meaning-input-group" style="display: none;">
+            <input type="text" class="dictation-input" id="user-meaning-input" placeholder="Nhập ý nghĩa Tiếng Việt" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="action-group">
+        <button type="button" class="btn-retry" id="btn-retry">↺ Làm lại</button>
+        <button type="button" class="btn-submit" id="btn-action">Kiểm tra (Enter)</button>
+    </div>
+</div>
+
+<script>
+    // ĐĂNG KÝ SERVICE WORKER ĐỂ CHẠY OFFLINE
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker đã kích hoạt thành công!', reg.scope))
+                .catch(err => console.log('Lỗi đăng ký Service Worker:', err));
+        });
+    }
+
+    let currentMode = 'standard';
+
+    let config = {
+        sheetId: localStorage.getItem('standalone_dict_sheet_id') || '',
+        sheetName: localStorage.getItem('standalone_dict_sheet_name') || 'Sheet1',
+        exp: parseInt(localStorage.getItem('standalone_dict_exp')) || 0,
+        selectedVoiceURI: localStorage.getItem('standalone_dict_voice_uri') || 'DEFAULT_SYSTEM',
+        speechRate: parseFloat(localStorage.getItem('standalone_dict_speech_rate')) || 0.85,
+        currentIndex: parseInt(localStorage.getItem('standalone_dict_current_index')) || 0
+    };
+
+    let vocabulary = JSON.parse(localStorage.getItem('standalone_dict_vocab_cache')) || [
+        { hanzi: "你的衣服很漂亮。", pinyin: "nǐ de yīfu hěn piàoliang.", meaning: "Quần áo của bạn đẹp quá." },
+        { hanzi: "你叫什么名字？", pinyin: "nǐ jiào shénme míngzi?", meaning: "Bạn tên là gì?" },
+        { hanzi: "我会做中国菜。", pinyin: "wǒ huì zuò Zhōngguó cài.", meaning: "Tôi biết nấu món ăn Trung Quốc." }
+    ];
+
+    let currentIndex = config.currentIndex < vocabulary.length ? config.currentIndex : 0;
+    let isChecked = false;
+    let availableVoices = [];
+
+    const meaningDisplay = document.getElementById('meaning-display');
+    const audioCenterBox = document.getElementById('audio-center-box');
+    const btnPlayAudioLarge = document.getElementById('btn-play-audio-large');
+    const userInput = document.getElementById('user-input');
+    const meaningInputGroup = document.getElementById('meaning-input-group');
+    const userMeaningInput = document.getElementById('user-meaning-input');
+    
+    const resultBox = document.getElementById('result-box');
+    const resultStatus = document.getElementById('result-status');
+    const resultDetails = document.getElementById('result-details');
+    const detailHanzi = document.getElementById('detail-hanzi');
+    const detailMeaning = document.getElementById('detail-meaning');
+    
+    const correctAnswerDisplay = document.getElementById('correct-answer-display');
+    const correctMeaningDisplay = document.getElementById('correct-meaning-display');
+    
+    const btnAction = document.getElementById('btn-action');
+    const btnRetry = document.getElementById('btn-retry');
+    const btnPlayAudio = document.getElementById('btn-play-audio');
+    
+    const countRemaining = document.getElementById('count-remaining');
+    const expPoints = document.getElementById('exp-points');
+    const progressBar = document.getElementById('progress-bar');
+    
+    const voiceSelect = document.getElementById('voice-select');
+    const speechRateSlider = document.getElementById('speech-rate-slider');
+    const speechRateVal = document.getElementById('speech-rate-val');
+
+    const sheetIdInput = document.getElementById('sheet-id-input');
+    const sheetNameInput = document.getElementById('sheet-name-input');
+    const btnSyncData = document.getElementById('btn-sync-data');
+    const currentSheetNameBadge = document.getElementById('current-sheet-name');
+    
+    const btnToggleAnswer = document.getElementById('btn-toggle-answer');
+    const answerContent = document.getElementById('answer-content');
+
+    const tabStandard = document.getElementById('tab-mode-standard');
+    const tabListening = document.getElementById('tab-mode-listening');
+
+    const STOP_WORDS = new Set([
+        "là", "của", "và", "hoặc", "nhưng", "thì", "mà", "ở", "tại", "cho", 
+        "với", "được", "bị", "bởi", "về", "ra", "vào", "lên", "xuống", "đã", 
+        "đang", "sẽ", "rất", "lắm", "quá", "nhé", "nhỉ", "à", "ơi", "cái", "con", 
+        "chiếc", "những", "các", "một", "này", "khi", "đó", "mấy", "sự", "việc"
+    ]);
+
+    /* CƠ CHẾ MỞ KHÓA ÂM THANH TRÊN ĐIỆN THOẠI TOÀN CỤC */
+    function unlockAudioContext() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.resume();
+            if (availableVoices.length === 0) loadVoices();
+        }
+    }
+    
+    ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(eventType => {
+        window.addEventListener(eventType, unlockAudioContext, { passive: true });
+    });
+
+    function loadVoices() {
+        if (!('speechSynthesis' in window)) return;
+
+        const voices = window.speechSynthesis.getVoices();
+        availableVoices = voices.filter(v => v.lang && (v.lang.includes('zh') || v.lang.includes('CN') || v.lang.includes('TW') || v.lang.includes('HK')));
+
+        const currentSelected = voiceSelect.value || config.selectedVoiceURI;
+        voiceSelect.innerHTML = '';
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = "DEFAULT_SYSTEM";
+        defaultOpt.textContent = "🔊 Giọng mặc định hệ thống (iOS/Android)";
+        voiceSelect.appendChild(defaultOpt);
+
+        if (availableVoices.length > 0) {
+            availableVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.voiceURI;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (voice.voiceURI === currentSelected) {
+                    option.selected = true;
+                }
+                voiceSelect.appendChild(option);
+            });
+        }
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    voiceSelect.addEventListener('change', (e) => {
+        config.selectedVoiceURI = e.target.value;
+        localStorage.setItem('standalone_dict_voice_uri', config.selectedVoiceURI);
+        if (vocabulary[currentIndex]) {
+            playAudio(vocabulary[currentIndex].hanzi);
+        }
+    });
+
+    speechRateSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        config.speechRate = val;
+        speechRateVal.textContent = val.toFixed(2) + 'x';
+        localStorage.setItem('standalone_dict_speech_rate', val);
+    });
+
+    function playAudio(text) {
+        if (!text) return;
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.resume();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = config.speechRate;
+            utterance.pitch = 1.0;
+
+            if (config.selectedVoiceURI && config.selectedVoiceURI !== "DEFAULT_SYSTEM") {
+                const voice = availableVoices.find(v => v.voiceURI === config.selectedVoiceURI);
+                if (voice) utterance.voice = voice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    /* XỬ LÝ CHUYỂN TAB CỰC NHẠY TRÊN DI ĐỘNG */
+    function switchMode(mode, e) {
+        if (e) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+        }
+        if (currentMode === mode) return;
+
+        currentMode = mode;
+        tabStandard.classList.toggle('active', mode === 'standard');
+        tabListening.classList.toggle('active', mode === 'listening');
+
+        if (mode === 'standard') {
+            meaningDisplay.style.display = 'block';
+            audioCenterBox.style.display = 'none';
+            btnPlayAudio.style.display = 'flex';
+            meaningInputGroup.style.display = 'none';
+            userInput.placeholder = "Nghe và gõ lại chữ Hán";
+        } else {
+            meaningDisplay.style.display = 'none';
+            audioCenterBox.style.display = 'flex';
+            btnPlayAudio.style.display = 'none';
+            meaningInputGroup.style.display = 'flex';
+            userInput.placeholder = "1. Gõ lại chữ Hán";
+        }
+
+        renderQuestion();
+    }
+
+    ['pointerdown', 'touchstart'].forEach(evt => {
+        tabStandard.addEventListener(evt, (e) => switchMode('standard', e), { passive: false });
+        tabListening.addEventListener(evt, (e) => switchMode('listening', e), { passive: false });
+    });
+    tabStandard.addEventListener('click', (e) => switchMode('standard', e));
+    tabListening.addEventListener('click', (e) => switchMode('listening', e));
+
+    /* THUẬT TOÁN XÁO TRỘN NGUYÊN TẮC FISHER-YATES */
+    function shuffleQuestions(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function initApp() {
+        sheetIdInput.value = config.sheetId;
+        sheetNameInput.value = config.sheetName;
+        speechRateSlider.value = config.speechRate;
+        speechRateVal.textContent = config.speechRate.toFixed(2) + 'x';
+
+        currentSheetNameBadge.textContent = config.sheetId ? config.sheetName : "Ngoại tuyến";
+        expPoints.textContent = config.exp;
+        
+        loadVoices();
+        setTimeout(loadVoices, 500);
+
+        if (!localStorage.getItem('standalone_dict_vocab_cache')) {
+            shuffleQuestions(vocabulary);
+        }
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (vocabulary.length === 0) {
+            meaningDisplay.textContent = "Chưa có dữ liệu câu hỏi. Vui lòng kết nối Google Sheet.";
+            return;
+        }
+
+        if (currentIndex >= vocabulary.length) {
+            alert(`🎉 Chúc mừng! Bạn đã hoàn thành toàn bộ ${vocabulary.length} câu hỏi! Tự động xáo trộn lại đề bài.`);
+            currentIndex = 0;
+            shuffleQuestions(vocabulary);
+        }
+
+        localStorage.setItem('standalone_dict_current_index', currentIndex);
+
+        const currentData = vocabulary[currentIndex];
+        
+        if (currentMode === 'standard') {
+            meaningDisplay.textContent = currentData.meaning;
+        } else {
+            setTimeout(() => { playAudio(currentData.hanzi); }, 300);
+        }
+
+        userInput.value = "";
+        userInput.disabled = false;
+        
+        userMeaningInput.value = "";
+        userMeaningInput.disabled = false;
+
+        resultBox.style.display = "none";
+        resultDetails.style.display = "none";
+        btnRetry.style.display = "none";
+
+        answerContent.style.display = "none";
+        btnToggleAnswer.textContent = "👁 Xem đáp án";
+
+        btnAction.textContent = "Kiểm tra (Enter)";
+        isChecked = false;
+
+        countRemaining.textContent = vocabulary.length - currentIndex;
+        progressBar.style.width = `${(currentIndex / vocabulary.length) * 100}%`;
+    }
+
+    function cleanString(str) {
+        return str.replace(/[。？！，、.,\/#!$%\^&\*;:{}=\-_`~()?\s]/g, "").trim().toLowerCase();
+    }
+
+    function extractKeywords(str) {
+        const cleanStr = str.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\s]+/g, " ").trim();
+        return cleanStr.split(" ").filter(w => w.length > 0 && !STOP_WORDS.has(w));
+    }
+
+    function checkMeaningKeywords(userText, targetText) {
+        if (!userText || userText.trim() === "") return false;
+        const targetKeywords = extractKeywords(targetText);
+        if (targetKeywords.length === 0) return true;
+
+        const userClean = userText.toLowerCase();
+        let matchedCount = 0;
+
+        targetKeywords.forEach(kw => {
+            if (userClean.includes(kw)) matchedCount++;
+        });
+
+        return (matchedCount / targetKeywords.length) >= 0.6;
+    }
+
+    function checkAnswer() {
+        const currentData = vocabulary[currentIndex];
+        const userHanzi = userInput.value;
+        const isHanziCorrect = cleanString(userHanzi) === cleanString(currentData.hanzi) && userHanzi.trim() !== "";
+
+        let isCorrect = false;
+
+        if (currentMode === 'standard') {
+            isCorrect = isHanziCorrect;
+            resultDetails.style.display = "none";
+        } else {
+            const userMeaning = userMeaningInput.value;
+            const isMeaningCorrect = checkMeaningKeywords(userMeaning, currentData.meaning);
+            
+            isCorrect = isHanziCorrect && isMeaningCorrect;
+
+            detailHanzi.innerHTML = `Chữ Hán: ${isHanziCorrect ? '<span style="color:#2e7d32">Đúng ✓</span>' : '<span style="color:#c62828">Sai ✗</span>'}`;
+            detailMeaning.innerHTML = `Ý nghĩa: ${isMeaningCorrect ? '<span style="color:#2e7d32">Đúng ✓</span>' : '<span style="color:#c62828">Sai ✗</span>'}`;
+            resultDetails.style.display = "flex";
+        }
+
+        if (isCorrect) {
+            config.exp += (currentMode === 'listening' ? 15 : 10);
+            resultStatus.innerHTML = `Chính xác! ✓ <span style="font-size:13px; color:#ff9800;">(+${currentMode === 'listening' ? 15 : 10} EXP)</span>`;
+            resultBox.style.backgroundColor = "#e8f5e9";
+            resultBox.style.borderColor = "#c8e6c9";
+            resultStatus.style.color = "#2e7d32";
+            playAudio(currentData.hanzi);
+            btnRetry.style.display = "none";
+        } else {
+            resultStatus.textContent = `Chưa chính xác! ✗`;
+            resultBox.style.backgroundColor = "#ffebee";
+            resultBox.style.borderColor = "#ffcdd2";
+            resultStatus.style.color = "#c62828";
+            btnRetry.style.display = "inline-block";
+        }
+
+        correctAnswerDisplay.innerHTML = `${currentData.hanzi}<br><span style="font-size:16px; color:#666; font-family:var(--font-sans);">${currentData.pinyin || ''}</span>`;
+        correctMeaningDisplay.textContent = `Nghĩa: ${currentData.meaning}`;
+
+        answerContent.style.display = "none";
+        btnToggleAnswer.textContent = "👁 Xem đáp án";
+        
+        resultBox.style.display = "block";
+        userInput.disabled = true;
+        userMeaningInput.disabled = true;
+        
+        btnAction.textContent = "Tiếp theo (Enter)";
+        isChecked = true;
+
+        expPoints.textContent = config.exp;
+        localStorage.setItem('standalone_dict_exp', config.exp);
+    }
+
+    function handleRetry() {
+        userInput.disabled = false;
+        userMeaningInput.disabled = false;
+
+        resultBox.style.display = "none";
+        resultDetails.style.display = "none";
+        btnRetry.style.display = "none";
+        btnAction.textContent = "Kiểm tra (Enter)";
+        isChecked = false;
+
+        if (currentMode === 'listening' && userInput.value.trim() !== '') {
+            userMeaningInput.focus();
+        } else {
+            userInput.focus();
+        }
+    }
+
+    function handleAction() {
+        if (!isChecked) {
+            checkAnswer();
+        } else {
+            currentIndex++;
+            renderQuestion();
+        }
+    }
+
+    btnToggleAnswer.addEventListener('click', () => {
+        if (answerContent.style.display === "block") {
+            answerContent.style.display = "none";
+            btnToggleAnswer.textContent = "👁 Xem đáp án";
+        } else {
+            answerContent.style.display = "block";
+            btnToggleAnswer.textContent = "🙈 Ẩn đáp án";
+        }
+    });
+
+    btnRetry.addEventListener('click', handleRetry);
+
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+            if (currentMode === 'listening' && !isChecked) {
+                userMeaningInput.focus();
+            } else {
+                handleAction();
+            }
+        }
+    });
+
+    userMeaningInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+            handleAction();
+        }
+    });
+
+    btnAction.addEventListener('click', handleAction);
+    btnPlayAudio.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
+    btnPlayAudioLarge.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
+
+    /* TẢI VÀ TỰ ĐỘNG XÁO TRỘN DỮ LIỆU TỪ GOOGLE SHEET */
+    function fetchGoogleSheetData() {
+        if (!navigator.onLine) {
+            alert("Bạn đang ở chế độ Ngoại tuyến (Offline). Vui lòng kết nối Internet để đồng bộ dữ liệu mới.");
+            return;
+        }
+
+        const id = sheetIdInput.value.trim();
+        const name = sheetNameInput.value.trim();
+
+        if (!id || !name) {
+            alert("Vui lòng điền đủ thông tin ID và Tên Tab Sheet.");
+            return;
+        }
+
+        btnSyncData.textContent = "Đang tải...";
+        btnSyncData.disabled = true;
+
+        window.handleGoogleSheetResponse = function(data) {
+            try {
+                const rows = data.table.rows;
+                if (!rows || rows.length === 0) {
+                    alert("Trang tính trống hoặc định dạng không đúng.");
+                    resetSyncButton();
+                    return;
+                }
+
+                const parsedData = rows.map(row => ({
+                    hanzi: row.c[0] ? (row.c[0].v !== null ? row.c[0].v.toString() : '') : '',
+                    pinyin: row.c[1] ? (row.c[1].v !== null ? row.c[1].v.toString() : '') : '',
+                    meaning: row.c[2] ? (row.c[2].v !== null ? row.c[2].v.toString() : '') : ''
+                })).filter(item => item.hanzi.trim() !== '');
+
+                if(parsedData.length > 0) {
+                    vocabulary = parsedData;
+                    
+                    shuffleQuestions(vocabulary);
+                    
+                    currentIndex = 0;
+                    config.sheetId = id;
+                    config.sheetName = name;
+                    
+                    localStorage.setItem('standalone_dict_sheet_id', id);
+                    localStorage.setItem('standalone_dict_sheet_name', name);
+                    localStorage.setItem('standalone_dict_vocab_cache', JSON.stringify(vocabulary));
+                    localStorage.setItem('standalone_dict_current_index', 0);
+                    
+                    alert(`Đồng bộ thành công! Đã ngẫu nhiên hóa ${vocabulary.length} câu vào ứng dụng.`);
+                    document.getElementById('settings-details').removeAttribute('open');
+                    initApp();
+                } else {
+                    alert("Không tìm thấy chữ Hán hợp lệ tại cột A.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi xử lý dữ liệu từ Google Sheet.");
+            } finally {
+                resetSyncButton();
+                if(document.getElementById('jsonp-sync-script')) {
+                    document.getElementById('jsonp-sync-script').remove();
+                }
+            }
+        };
+
+        const script = document.createElement('script');
+        script.id = 'jsonp-sync-script';
+        script.src = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=responseHandler:handleGoogleSheetResponse&sheet=${encodeURIComponent(name)}`;
+        
+        script.onerror = function() {
+            alert("Đồng bộ thất bại! Hãy kiểm tra kết nối mạng và thiết lập chia sẻ của Google Sheet.");
+            resetSyncButton();
+        };
+
+        document.body.appendChild(script);
+    }
+
+    function resetSyncButton() {
+        btnSyncData.textContent = "Đồng bộ dữ liệu";
+        btnSyncData.disabled = false;
+    }
+
+    btnSyncData.addEventListener('click', fetchGoogleSheetData);
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
