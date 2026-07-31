@@ -10,10 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Nhúng Font Google: Noto Serif SC + ZCOOL XiaoWei + Ma Shan Zheng (Font Khải Thư chuẩn cho di động) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <!-- Font web Khải Thư dự phòng chất lượng cao cho di động -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
     
     <style>
         :root {
@@ -23,8 +21,8 @@
             --error-color: #c62828;
             --text-main: #333;
             --bg-main: #f8f9fa;
-            /* Cập nhật thứ tự ưu tiên font KaiTi hỗ trợ tốt di động */
-            --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+            /* Ưu tiên tuyệt đối KaiTi/STKaiti hệ thống cho PC trước */
+            --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "楷体", "LXGW WenKai", serif;
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -91,7 +89,6 @@
             background-color: #ffffff;
         }
 
-        /* Navigation Tabs Tối ưu cảm ứng di động */
         .tab-nav {
             display: flex;
             background-color: #eef2f7;
@@ -239,7 +236,7 @@
 
         .chinese-text-display {
             font-family: var(--font-kaiti);
-            font-size: 32px;
+            font-size: 34px;
             color: #1a1a1a;
             font-weight: 500;
             line-height: 1.3;
@@ -257,7 +254,7 @@
         .dictation-input {
             flex: 1;
             padding: 12px 14px;
-            font-size: 24px;
+            font-size: 26px;
             font-family: var(--font-kaiti);
             font-weight: 500;
             border: 2px solid #e0e0e0;
@@ -270,14 +267,12 @@
             line-height: 1.4;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
-            font-synthesis: none;
         }
 
         .dictation-input::placeholder {
             font-family: var(--font-sans) !important;
             font-size: 16px !important;
             font-weight: normal !important;
-            letter-spacing: normal !important;
             color: #888888;
             opacity: 1;
         }
@@ -384,13 +379,16 @@
             margin-top: 6px;
         }
 
-        /* 🖥 DESKTOP DISPLAY */
+        /* 💻 MÁY TÍNH (DESKTOP): Ép dùng 100% Font KaiTi gốc hệ thống Windows/Mac */
         @media (min-width: 769px) {
+            :root {
+                --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "楷体", serif !important;
+            }
             body { padding: 40px 20px; }
             .container { max-width: 800px; padding: 32px; }
             .meaning-title { font-size: 26px; }
-            .chinese-text-display { font-size: 38px; }
-            .dictation-input { font-size: 28px; padding: 14px; }
+            .chinese-text-display { font-size: 40px; }
+            .dictation-input { font-size: 30px; padding: 14px; }
             .dictation-input::placeholder { font-size: 18px !important; }
             .tab-btn { font-size: 16px; padding: 14px 10px; }
             .btn-submit, .btn-retry { font-size: 18px; padding: 16px; }
@@ -398,41 +396,22 @@
             .header-status { font-size: 15px; }
         }
 
-        /* 📱 MOBILE RESPONSIVE TỰ ĐỘNG */
+        /* 📱 ĐIỆN THOẠI (MOBILE): Sử dụng LXGW WenKai làm font Khải Thư chất lượng cao */
         @media (max-width: 768px) {
+            :root {
+                --font-kaiti: "LXGW WenKai", "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
+            }
             body { 
                 padding: calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 8px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 8px); 
             }
-            .container { 
-                padding: clamp(12px, 4vw, 20px); 
-                border-radius: 14px;
-            }
-            .meaning-title { 
-                font-size: clamp(17px, 5vw, 22px); 
-                margin-bottom: 16px; 
-            }
-            .chinese-text-display { 
-                font-size: clamp(24px, 7vw, 32px); 
-            }
-            .dictation-input { 
-                font-size: clamp(18px, 5.5vw, 24px); 
-                padding: clamp(8px, 2.5vw, 12px); 
-            }
-            .dictation-input::placeholder { 
-                font-size: clamp(13px, 3.8vw, 16px) !important; 
-            }
-            .btn-audio { 
-                width: clamp(44px, 12vw, 52px); 
-                height: clamp(44px, 12vw, 52px); 
-            }
-            .btn-submit, .btn-retry { 
-                font-size: clamp(14px, 4vw, 16px); 
-                padding: clamp(10px, 3vw, 14px); 
-            }
-            .badge-level { 
-                max-width: 45vw; 
-                font-size: 11px;
-            }
+            .container { padding: clamp(12px, 4vw, 20px); border-radius: 14px; }
+            .meaning-title { font-size: clamp(17px, 5vw, 22px); margin-bottom: 16px; }
+            .chinese-text-display { font-size: clamp(26px, 7vw, 34px); }
+            .dictation-input { font-size: clamp(20px, 6vw, 26px); padding: clamp(8px, 2.5vw, 12px); }
+            .dictation-input::placeholder { font-size: clamp(13px, 3.8vw, 16px) !important; }
+            .btn-audio { width: clamp(44px, 12vw, 52px); height: clamp(44px, 12vw, 52px); }
+            .btn-submit, .btn-retry { font-size: clamp(14px, 4vw, 16px); padding: clamp(10px, 3vw, 14px); }
+            .badge-level { max-width: 45vw; font-size: 11px; }
         }
     </style>
 </head>
@@ -444,7 +423,7 @@
         <div class="tools-panel-content">
             <label class="config-label">🔊 Giọng đọc Tiếng Trung:</label>
             <select id="voice-select" class="config-select">
-                <option value="DEFAULT_SYSTEM">🔊 Giọng mặc định hệ thống (iOS/Android)</option>
+                <option value="DEFAULT_SYSTEM">🔊 Giọng mặc định hệ thống</option>
             </select>
 
             <label class="config-label">⚡ Tốc độ đọc: <span id="speech-rate-val">0.85x</span></label>
@@ -525,8 +504,8 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker đã kích hoạt thành công!', reg.scope))
-                .catch(err => console.log('Lỗi đăng ký Service Worker:', err));
+                .then(reg => console.log('SW Ready:', reg.scope))
+                .catch(err => console.log('SW Fail:', err));
         });
     }
 
@@ -549,7 +528,6 @@
 
     let currentIndex = config.currentIndex < vocabulary.length ? config.currentIndex : 0;
     let isChecked = false;
-    let availableVoices = [];
     let audioUnlocked = false;
 
     const meaningDisplay = document.getElementById('meaning-display');
@@ -598,12 +576,10 @@
         "chiếc", "những", "các", "một", "này", "khi", "đó", "mấy", "sự", "việc"
     ]);
 
-    /* CƠ CHẾ MỞ KHÓA ÂM THANH TRÊN ĐIỆN THOẠI (iOS / ANDROID) */
     function unlockAudioContext() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.resume();
             if (!audioUnlocked) {
-                // Tạo âm thanh rỗng kích hoạt AudioContext của trình duyệt
                 const silentUtterance = new SpeechSynthesisUtterance('');
                 silentUtterance.volume = 0;
                 window.speechSynthesis.speak(silentUtterance);
@@ -620,28 +596,28 @@
     function loadVoices() {
         if (!('speechSynthesis' in window)) return;
 
-        const voices = window.speechSynthesis.getVoices();
-        availableVoices = voices.filter(v => v.lang && (v.lang.includes('zh') || v.lang.includes('CN') || v.lang.includes('TW') || v.lang.includes('HK')));
+        const allVoices = window.speechSynthesis.getVoices();
+        if (!allVoices || allVoices.length === 0) return;
 
-        const currentSelected = voiceSelect.value || config.selectedVoiceURI;
+        const zhVoices = allVoices.filter(v => v.lang && (v.lang.includes('zh') || v.lang.includes('CN') || v.lang.includes('TW') || v.lang.includes('HK')));
+
+        const currentSelected = config.selectedVoiceURI;
         voiceSelect.innerHTML = '';
 
         const defaultOpt = document.createElement('option');
         defaultOpt.value = "DEFAULT_SYSTEM";
-        defaultOpt.textContent = "🔊 Giọng mặc định hệ thống (iOS/Android)";
+        defaultOpt.textContent = "🔊 Giọng mặc định hệ thống";
         voiceSelect.appendChild(defaultOpt);
 
-        if (availableVoices.length > 0) {
-            availableVoices.forEach(voice => {
-                const option = document.createElement('option');
-                option.value = voice.voiceURI;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                if (voice.voiceURI === currentSelected) {
-                    option.selected = true;
-                }
-                voiceSelect.appendChild(option);
-            });
-        }
+        zhVoices.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.voiceURI || voice.name;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            if (option.value === currentSelected) {
+                option.selected = true;
+            }
+            voiceSelect.appendChild(option);
+        });
     }
 
     if ('speechSynthesis' in window) {
@@ -664,27 +640,27 @@
     });
 
     function playAudio(text) {
-        if (!text) return;
+        if (!text || !('speechSynthesis' in window)) return;
 
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-CN';
-            utterance.rate = config.speechRate;
-            utterance.pitch = 1.0;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.rate = config.speechRate;
 
-            if (config.selectedVoiceURI && config.selectedVoiceURI !== "DEFAULT_SYSTEM") {
-                const voice = availableVoices.find(v => v.voiceURI === config.selectedVoiceURI);
-                if (voice) utterance.voice = voice;
+        const allVoices = window.speechSynthesis.getVoices();
+        if (config.selectedVoiceURI && config.selectedVoiceURI !== "DEFAULT_SYSTEM" && allVoices.length > 0) {
+            const matchedVoice = allVoices.find(v => (v.voiceURI === config.selectedVoiceURI || v.name === config.selectedVoiceURI));
+            if (matchedVoice) {
+                utterance.voice = matchedVoice;
+                utterance.lang = matchedVoice.lang;
             }
-
-            window.speechSynthesis.speak(utterance);
         }
+
+        window.speechSynthesis.speak(utterance);
     }
 
-    /* CHUYỂN TAB TRÊN DI ĐỘNG */
     function switchMode(mode, e) {
         if (e) {
             if (e.cancelable) e.preventDefault();
@@ -737,8 +713,8 @@
         expPoints.textContent = config.exp;
         
         loadVoices();
-        setTimeout(loadVoices, 500);
-        setTimeout(loadVoices, 1500);
+        setTimeout(loadVoices, 300);
+        setTimeout(loadVoices, 1000);
 
         if (!localStorage.getItem('standalone_dict_vocab_cache')) {
             shuffleQuestions(vocabulary);
@@ -929,7 +905,6 @@
     btnPlayAudio.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
     btnPlayAudioLarge.addEventListener('click', () => { if(vocabulary[currentIndex]) playAudio(vocabulary[currentIndex].hanzi); });
 
-    /* TẢI DỮ LIỆU TỪ GOOGLE SHEET */
     function fetchGoogleSheetData() {
         if (!navigator.onLine) {
             alert("Bạn đang ở chế độ Ngoại tuyến (Offline). Vui lòng kết nối Internet để đồng bộ dữ liệu mới.");
