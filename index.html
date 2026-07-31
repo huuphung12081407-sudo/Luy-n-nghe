@@ -851,7 +851,7 @@
         }
 
         correctAnswerDisplay.innerHTML = `${currentData.hanzi}<br><span style="font-size:16px; color:#666; font-family:var(--font-sans);">${currentData.pinyin || ''}</span>`;
-        correctMeaningDisplay.textContent = `Nghĩa: ${currentData.meaning}`;
+        correctMeaningDisplay.textContent = `${currentData.meaning}`;
 
         answerContent.style.display = "none";
         btnToggleAnswer.textContent = "👁 Xem đáp án";
