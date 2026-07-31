@@ -21,7 +21,6 @@
             --error-color: #c62828;
             --text-main: #333;
             --bg-main: #f8f9fa;
-            /* Ưu tiên tuyệt đối KaiTi/STKaiti hệ thống cho PC trước */
             --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "楷体", "LXGW WenKai", serif;
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
@@ -379,7 +378,7 @@
             margin-top: 6px;
         }
 
-        /* 💻 MÁY TÍNH (DESKTOP): Ép dùng 100% Font KaiTi gốc hệ thống Windows/Mac */
+        /* 💻 MÁY TÍNH (DESKTOP) */
         @media (min-width: 769px) {
             :root {
                 --font-kaiti: "KaiTi", "STKaiti", "华文楷体", "楷体", serif !important;
@@ -396,7 +395,7 @@
             .header-status { font-size: 15px; }
         }
 
-        /* 📱 ĐIỆN THOẠI (MOBILE): Sử dụng LXGW WenKai làm font Khải Thư chất lượng cao */
+        /* 📱 ĐIỆN THOẠI (MOBILE) */
         @media (max-width: 768px) {
             :root {
                 --font-kaiti: "LXGW WenKai", "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
@@ -576,6 +575,7 @@
         "chiếc", "những", "các", "một", "này", "khi", "đó", "mấy", "sự", "việc"
     ]);
 
+    /* CƠ CHẾ KÍCH HOẠT ÂM THANH VÀ NẠP GIỌNG */
     function unlockAudioContext() {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.resume();
@@ -599,6 +599,7 @@
         const allVoices = window.speechSynthesis.getVoices();
         if (!allVoices || allVoices.length === 0) return;
 
+        // Lọc tất cả các giọng đọc Tiếng Trung (zh, CN, TW, HK)
         const zhVoices = allVoices.filter(v => v.lang && (v.lang.includes('zh') || v.lang.includes('CN') || v.lang.includes('TW') || v.lang.includes('HK')));
 
         const currentSelected = config.selectedVoiceURI;
@@ -609,20 +610,43 @@
         defaultOpt.textContent = "🔊 Giọng mặc định hệ thống";
         voiceSelect.appendChild(defaultOpt);
 
-        zhVoices.forEach(voice => {
-            const option = document.createElement('option');
-            option.value = voice.voiceURI || voice.name;
-            option.textContent = `${voice.name} (${voice.lang})`;
-            if (option.value === currentSelected) {
-                option.selected = true;
-            }
-            voiceSelect.appendChild(option);
-        });
+        if (zhVoices.length > 0) {
+            zhVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.voiceURI || voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (option.value === currentSelected) {
+                    option.selected = true;
+                }
+                voiceSelect.appendChild(option);
+            });
+        } else {
+            // Nếu không lọc được zh riêng, nạp toàn bộ danh sách voice phòng trường hợp thiết bị báo sai mã ngôn ngữ
+            allVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.voiceURI || voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                if (option.value === currentSelected) {
+                    option.selected = true;
+                }
+                voiceSelect.appendChild(option);
+            });
+        }
     }
 
     if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
+
+    // Chạy vòng lặp nhẹ trong 3 giây đầu để hỗ trợ thiết bị nạp giọng chậm
+    let voiceRetryCounter = 0;
+    const voiceInterval = setInterval(() => {
+        loadVoices();
+        voiceRetryCounter++;
+        if (voiceRetryCounter >= 10 || (voiceSelect.options && voiceSelect.options.length > 1)) {
+            clearInterval(voiceInterval);
+        }
+    }, 300);
 
     voiceSelect.addEventListener('change', (e) => {
         config.selectedVoiceURI = e.target.value;
@@ -713,8 +737,6 @@
         expPoints.textContent = config.exp;
         
         loadVoices();
-        setTimeout(loadVoices, 300);
-        setTimeout(loadVoices, 1000);
 
         if (!localStorage.getItem('standalone_dict_vocab_cache')) {
             shuffleQuestions(vocabulary);
